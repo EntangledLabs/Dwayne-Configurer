@@ -55,7 +55,7 @@ def write_engine_config(f, eventname:str, timezone:str):
     )
 
 # Writes the point awarding/penalty configuration
-def write_scoring_config(f, servicepts, sla=False):
+def write_scoring_config(f, servicepts:int, sla=False):
     lines = [
         'servicepoints = {}\n'.format(servicepts),
         'slathreshold = {}\n'.format(
@@ -127,20 +127,40 @@ def write_team_users(f, g, num:int) -> None:
 # +=========================| Prompter |=========================+
 # +===============================================================+
 
-def prompt_config():
-    pass
+# Prompts the user to enter in various details for the basic competition configuration
+# and writes the configuration
+def prompt_config(f):
+    name = input("Enter the competition name: ")
+    timezone = input("Enter in your timezone i.e. America/Los_Angeles: ")
+    servicepoints = int(input("Enter in points earned per service check: "))
+    sla = input("Are you using SLA? Yes / No: ")
+    if sla.capitalize() == 'Yes':
+        sla = True
+    else:
+        sla = False
 
+    write_section_split(f, 'Config')
+    write_engine_config(f, name, timezone)
+    write_scoring_config(f, servicepoints, sla)
+
+# Prompts the user for credentials and writes all credentials
+def prompt_credentials(f, g):
+    redteam = input("Do you want red team credentials? Yes / No: ")
+    num = int(input("How many teams will there be? "))
+    if redteam.capitalize() == 'Yes':
+        redteam = True
+    else:
+        redteam = False
+    
+    write_section_split(f, 'Credentials')
+    write_admin_user(f, g)
+    write_admin_user(f, g, redteam)
+    write_team_users(f, g, num)
 
 
 if __name__ == '__main__':
-    f = init()
-    g = creds_init()
-    write_section_split(f, 'Config')
-    write_engine_config(f, 'Test config', 'America/Los_Angeles')
-    write_scoring_config(f, 10)
-    write_section_split(f, 'Credentials')
-    write_admin_user(f, g)
-    write_admin_user(f, g, red=True)
-    write_team_users(f, g, 5)
-    write_section_split(f, 'Box 1')
+    f,g = init(), creds_init()
+    prompt_config(f)
+    prompt_credentials(f, g)
+    write_section_split(f, 'Box {}'.format(1))
     f.close()
