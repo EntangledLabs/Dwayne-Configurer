@@ -1,16 +1,22 @@
 import string, secrets, datetime, csv
 
+
+# +===============================================================+
+# +===========================| Init |============================+
+# +===============================================================+
+
+# Stores the current datetime for file creation
 now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
 # Creates the dwayne config file with the current date and time.
 # Returns a file object that should be closed properly at the end
 def init():
-    f = open('dwayne-{}.conf'.format(now), 'w+')
+    f = open('./output/dwayne-{}.conf'.format(now), 'w+')
     return f
 
 # Creates a file with all of the credentials in CSV format
 def creds_init():
-    f = open('creds-{}.csv'.format(now), 'w+', newline='')
+    f = open('./output/creds-{}.csv'.format(now), 'w+', newline='')
     credreader = csv.writer(
         f, 
         delimiter=' ', 
@@ -18,6 +24,10 @@ def creds_init():
         quoting=csv.QUOTE_MINIMAL
     )
     return credreader
+
+# +===============================================================+
+# +========================| Credentials |========================+
+# +===============================================================+
 
 # The code for make_password() was taken from the Python 3.10.6 Standard Library 
 # documentation for the secrets package
@@ -57,6 +67,10 @@ def write_team_users(f, g, num:int) -> None:
             '\n']
         )
         g.writerow(['team{}'.format(i), pw])
+
+# +===============================================================+
+# +========================| Main method |========================+
+# +===============================================================+
 
 if __name__ == '__main__':
     f = init()
