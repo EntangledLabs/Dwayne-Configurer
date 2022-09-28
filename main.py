@@ -1,12 +1,23 @@
-import string
-import secrets
-import datetime
+import string, secrets, datetime, csv
+
+now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
 # Creates the dwayne config file with the current date and time.
 # Returns a file object that should be closed properly at the end
 def init():
-    f = open('dwayne-{}.conf'.format(datetime.datetime.now().strftime("%Y%m%d_%H%M")), 'w+')
+    f = open('dwayne-{}.conf'.format(now), 'w+')
     return f
+
+# Creates a file with all of the credentials in CSV format
+def creds_init():
+    f = open('creds-{}.csv'.format(now), 'w+', newline='')
+    credreader = csv.writer(
+        f, 
+        delimiter=' ', 
+        quotechar='|', 
+        quoting=csv.QUOTE_MINIMAL
+    )
+    return credreader
 
 # The code for make_password() was taken from the Python 3.10.6 Standard Library 
 # documentation for the secrets package
@@ -22,37 +33,35 @@ def make_passwd() -> str:
     return password
 
 # Creates admin user credentials for green team use
-def write_admin_user(f):
+# Also writes red team credentials for red team use
+def write_admin_user(f, g, red=False):
+    pw = make_passwd()
+    name = 'admin' if not red else 'red'
     f.writelines(
-        ['[[admin]]\n', 
-        'name = \"admin\"\n',
-        'pw = \"{}\"\n'.format(make_passwd()),
+        ['[[{}]]\n'.format(name), 
+        'name = \"{}\"\n'.format(name),
+        'pw = \"{}\"\n'.format(pw),
         '\n']
     )
-
-# Creates red team user credentials for red team use 
-def write_redteam_user(f):
-    f.writelines(
-        ['[[red]]\n', 
-        'name = \"red\"\n',
-        'pw = \"{}\"\n'.format(make_passwd()),
-        '\n']
-    )
+    g.writerow([name, pw])
 
 # Creates scoring engine credentials for each team and writes them
 # into the config file
-def write_team_users(f, num:int) -> None:
+def write_team_users(f, g, num:int) -> None:
     for i in range(1,num+1):
+        pw = make_passwd()
         f.writelines(
             ['[[team]]\n', 
             'ip = \"{}\"\n'.format(i),
-            'pw = \"{}\"\n'.format(make_passwd()),
+            'pw = \"{}\"\n'.format(pw),
             '\n']
         )
+        g.writerow(['team{}'.format(i), pw])
 
 if __name__ == '__main__':
     f = init()
-    write_admin_user(f)
-    write_redteam_user(f)
-    write_team_users(f, 5)
+    g = creds_init()
+    write_admin_user(f, g)
+    write_admin_user(f, g, red=True)
+    write_team_users(f, g, 5)
     f.close()
