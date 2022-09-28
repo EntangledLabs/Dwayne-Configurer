@@ -2,7 +2,7 @@ import string, secrets, datetime, csv
 
 
 # +===============================================================+
-# +===========================| Init |============================+
+# +=======================| Init + util |=========================+
 # +===============================================================+
 
 # Stores the current datetime for file creation
@@ -24,6 +24,49 @@ def creds_init():
         quoting=csv.QUOTE_MINIMAL
     )
     return credreader
+
+# Writes a section comment and extra newlines for readability
+def write_section_split(f, section):
+    f.writelines(
+        [
+            '# {}\n\n'.format(section)
+        ]
+    )
+
+# +===============================================================+
+# +==========================| Engine |===========================+
+# +===============================================================+
+
+# Writes the first few lines of the config that defines the overall scoring engine
+# mechanics.
+def write_engine_config(f, eventname:str, timezone:str):
+    f.writelines(
+        [
+            'event = \"{}\"\n'.format(eventname),
+            'delay = 300\n',
+            'verbose = false\n',
+            'jitter = 3\n',
+            'timeout = 30\n',
+            'timezone = \"{}\"\n'.format(timezone),
+            'nopasswords = false\n',
+            'easypcr = true\n',
+            'disableinfopage = false\n\n',
+        ]
+    )
+
+# Writes the point awarding/penalty configuration
+def write_scoring_config(f, servicepts, sla=False):
+    lines = [
+        'servicepoints = {}\n'.format(servicepts),
+        'slathreshold = {}\n'.format(
+            5000 if not sla else 5
+        ),
+        'slapoints = {}\n\n'.format(
+            10
+        )
+
+    ]
+    f.writelines(lines)
 
 # +===============================================================+
 # +========================| Credentials |========================+
@@ -48,10 +91,12 @@ def write_admin_user(f, g, red=False):
     pw = make_passwd()
     name = 'admin' if not red else 'red'
     f.writelines(
-        ['[[{}]]\n'.format(name), 
-        'name = \"{}\"\n'.format(name),
-        'pw = \"{}\"\n'.format(pw),
-        '\n']
+        [
+            '[[{}]]\n'.format(name), 
+            'name = \"{}\"\n'.format(name),
+            'pw = \"{}\"\n'.format(pw),
+            '\n'
+        ]
     )
     g.writerow([name, pw])
 
@@ -61,21 +106,41 @@ def write_team_users(f, g, num:int) -> None:
     for i in range(1,num+1):
         pw = make_passwd()
         f.writelines(
-            ['[[team]]\n', 
-            'ip = \"{}\"\n'.format(i),
-            'pw = \"{}\"\n'.format(pw),
-            '\n']
+            [
+                '[[team]]\n', 
+                'ip = \"{}\"\n'.format(i),
+                'pw = \"{}\"\n'.format(pw),
+                '\n'
+            ]
         )
         g.writerow(['team{}'.format(i), pw])
 
 # +===============================================================+
-# +========================| Main method |========================+
+# +============================| Box |============================+
 # +===============================================================+
+
+
+
+
+
+# +===============================================================+
+# +=========================| Prompter |=========================+
+# +===============================================================+
+
+def prompt_config():
+    pass
+
+
 
 if __name__ == '__main__':
     f = init()
     g = creds_init()
+    write_section_split(f, 'Config')
+    write_engine_config(f, 'Test config', 'America/Los_Angeles')
+    write_scoring_config(f, 10)
+    write_section_split(f, 'Credentials')
     write_admin_user(f, g)
     write_admin_user(f, g, red=True)
     write_team_users(f, g, 5)
+    write_section_split(f, 'Box 1')
     f.close()
