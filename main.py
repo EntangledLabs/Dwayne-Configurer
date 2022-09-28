@@ -19,7 +19,7 @@ def creds_init():
     f = open('./output/creds-{}.csv'.format(now), 'w+', newline='')
     credreader = csv.writer(
         f, 
-        delimiter=' ', 
+        delimiter=',', 
         quotechar='|', 
         quoting=csv.QUOTE_MINIMAL
     )
@@ -116,13 +116,86 @@ def write_team_users(f, g, num:int) -> None:
         g.writerow(['team{}'.format(i), pw])
 
 # +===============================================================+
+# +=======================| Service Creds |=======================+
+# +===============================================================+
+
+# Creates a credential for the default box user
+def write_default_box_cred(f, name:str, pw:str):
+    f.writelines(
+        [
+            '[[creds]]\n',
+            'name = \"admins\"\n',
+            'usernames = [\"{}\"]\n'.format(name),
+            'defaultpw = \"{}\"\n\n'.format(pw)
+        ]
+    )
+
+# Creates a credential list
+def write_box_creds(f, name:str, usernames:list, pw:str):
+    f.writelines(
+        [
+            '[[creds]]\n',
+            'name = \"{}\"\n'.format(name),
+            'usernames = {}\n'.format('[\"{}\"]'.format('\", \"'.join(usernames))),
+            'defaultpw = \"{}\"\n\n'.format(pw)
+        ]
+    )
+
+# +===============================================================+
 # +============================| Box |============================+
 # +===============================================================+
 
+# Writes the basic box details
+def write_box_basics(f, name:str, ip:str):
+    f.writelines(
+        [
+            '[[box]]\n',
+            'name = \"{}\"\n'.format(name),
+            'ip = \"{}\"\n\n'.format(ip)
+        ]
+    )
 
+def box_cmd(command:str, regex:str, display="cmd"):
+    pass
 
+def box_dns(port:str, records:list, display="dns"):
+    pass
 
+def box_ftp(port:str, anonymous=False, files=list(), display="ftp", credlists=list()):
+    pass
 
+def box_imap(port:str, encrypted=False, display="imap"):
+    pass
+
+def box_ldap(port:str, domain:str, encrypted=False, display="ldap"):
+    pass
+
+def box_ping(count:str, percent:str, allowpacketloss=True, display="ping"):
+    pass
+
+def box_rdp(port:str, display="rdp"):
+    pass
+
+def box_smb(port=21, anonymous=False, files=list(), display="smb", credlists=list()):
+    pass
+
+def box_smtp(sender:str, receiver:str, body:str, encrypted=False, display="smtp"):
+    pass
+
+def box_sql(queries:list, display="sql", credlists=list()):
+    pass
+
+def box_ssh(port:str, display="ssh", commands=list(), credlists=list()):
+    pass
+
+def box_tcp(port:str, display="tcp"):
+    pass
+
+def box_vnc(port:str, display="vnc"):
+    pass
+
+def box_web(port=80, scheme="http", display="sql", urls=list(), credlists=list()):
+    pass
 # +===============================================================+
 # +=========================| Prompter |=========================+
 # +===============================================================+
@@ -154,13 +227,23 @@ def prompt_credentials(f, g):
     
     write_section_split(f, 'Credentials')
     write_admin_user(f, g)
-    write_admin_user(f, g, redteam)
+    if redteam:
+        write_admin_user(f, g, redteam)
     write_team_users(f, g, num)
 
+# Prompts the user for box creation
+def prompt_boxes(f):
+    write_section_split(f, 'Box {}'.format(1))
+    num = int(input("How many boxes are there? "))
+
+    for i in range(0,num):
+        name = input("What is the box name? ")
+        ip = input("What is the box IP range? i.e. 172.16.x.1: ")
+        write_box_basics(f, name, ip)
 
 if __name__ == '__main__':
     f,g = init(), creds_init()
     prompt_config(f)
     prompt_credentials(f, g)
-    write_section_split(f, 'Box {}'.format(1))
+    prompt_boxes(f)
     f.close()
