@@ -10,7 +10,7 @@ now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 # Creates the dwayne config file with the current date and time.
 # Returns a file object that should be closed properly at the end
 def init():
-    path = os.path.join(os.cwd, "output")
+    path = os.path.join(os.getcwd(), "output")
     os.mkdir(path)
 
     f = open('./output/dwayne-{}.conf'.format(now), 'w+')
