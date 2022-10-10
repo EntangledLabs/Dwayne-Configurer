@@ -211,6 +211,8 @@ def prompt_config(f):
         sla = True
     else:
         sla = False
+    if timezone == None:
+        timezone = "America/Los_Angeles"
 
     write_section_split(f, 'Config')
     write_engine_config(f, name, timezone)
@@ -233,10 +235,10 @@ def prompt_credentials(f, g):
 
 # Prompts the user for box creation
 def prompt_boxes(f):
-    write_section_split(f, 'Box {}'.format(1))
     num = int(input("How many boxes are there? "))
 
     for i in range(0,num):
+        write_section_split(f, 'Box {}'.format(i))
         name = input("What is the box name? ")
         ip = input("What is the box IP range? i.e. 172.16.x.1: ")
         write_box_basics(f, name, ip)
