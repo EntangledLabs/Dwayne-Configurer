@@ -1,5 +1,4 @@
-import string, secrets, datetime, csv
-
+import string, secrets, datetime, csv, os
 
 # +===============================================================+
 # +=======================| Init + util |=========================+
@@ -11,6 +10,9 @@ now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 # Creates the dwayne config file with the current date and time.
 # Returns a file object that should be closed properly at the end
 def init():
+    path = os.path.join(os.cwd, "output")
+    os.mkdir(path)
+
     f = open('./output/dwayne-{}.conf'.format(now), 'w+')
     return f
 
