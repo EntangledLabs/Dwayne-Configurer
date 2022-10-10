@@ -11,8 +11,11 @@ now = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 # Returns a file object that should be closed properly at the end
 def init():
     path = os.path.join(os.getcwd(), "output")
-    os.mkdir(path)
-
+    try:
+        os.mkdir(path)
+    except:
+        pass
+    
     f = open('./output/dwayne-{}.conf'.format(now), 'w+')
     return f
 
